@@ -1,5 +1,5 @@
 <!-- The Author meta propagates the byline in a number of social networks -->
-<meta name="author" content="{{ process.env.PRIMARY_AUTHOR }}" />
+<meta name="author" content="{{ site.author }}" />
 
 <meta property="og:title"
     content="{% if title %}{{ title | striptags(false) | safe | truncate(160) }}{% else %}{{ site.site_name }}{% endif %}">
@@ -66,7 +66,7 @@
         {% for tag in tags %}
         <meta property="article:tag" content="{{tag}}" />
         {% endfor %}
-        <meta name="keywords" content="{{ tags | join(', ') }">
+        <meta name="keywords" content="{{ tags | join(', ') }}">
     {% endif %}
 
 

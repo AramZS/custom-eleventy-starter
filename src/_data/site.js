@@ -1,5 +1,6 @@
 module.exports = (info) => {
-	return {
+	//console.log("Global Site Data", info);
+	const site_data = {
 		lang: "en-US",
 		github: {
 			build_revision: process.env.MY_GITHUB_RUN_ID || 1.0,
@@ -14,4 +15,6 @@ module.exports = (info) => {
 		authorPhoto:
 			"https://raw.githubusercontent.com/AramZS/aramzs.github.io/master/_includes/Aram-Zucker-Scharff-square.jpg",
 	};
+	//console.log("Created Site Data", site_data);
+	return site_data;
 };

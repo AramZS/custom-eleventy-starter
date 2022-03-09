@@ -5,7 +5,7 @@ const path = require("path");
 const del = require("del");
 var mdProcessor = require("markdown-it");
 const sitemap = require("@quasibit/eleventy-plugin-sitemap");
-// const UpgradeHelper = require("@11ty/eleventy-upgrade-help");
+const UpgradeHelper = require("@11ty/eleventy-upgrade-help");
 
 let Nunjucks = require("nunjucks");
 const normalize = require("normalize-path");
@@ -103,7 +103,7 @@ module.exports = function (eleventyConfig) {
 		sitemap: {
 			// Options for SitemapStream. See https://github.com/ekalinin/sitemap.js/blob/master/api.md#sitemapstream
 			// Hostname is needed when the URLs of the items don't include it.
-			hostname: domain_name,
+			hostname: site,
 		},
 	});
 	eleventyConfig.addWatchTarget("./_custom-plugins/");
@@ -118,7 +118,7 @@ module.exports = function (eleventyConfig) {
 		sassLocation: path.join(path.resolve("."), "src/_sass/"),
 		perTemplateFiles: "template-",
 		outDir: path.join(path.resolve("."), "docs"),
-		domainName: domain_name,
+		domainName: site,
 	});
 
 	// https://www.npmjs.com/package/@quasibit/eleventy-plugin-sitemap
@@ -140,19 +140,6 @@ module.exports = function (eleventyConfig) {
 	});
 
 	eleventyConfig.addPlugin(UpgradeHelper);
-
-	// Can't use this until ver 1 apparently
-	/**
-	const getDirectories = source =>
-		readdirSync(source, { withFileTypes: true })
-			.filter(dirent => dirent.isDirectory())
-			.map(dirent => dirent.name)
-
-
-	eleventyConfig.addGlobalData('projects', function(collectionApi) {
-        return getDirectories('src/projects/');
-    });
-	*/
 
 	const pathNormalizer = function (pathString) {
 		return normalize(
@@ -436,7 +423,7 @@ module.exports = function (eleventyConfig) {
 		existingRenderer: markdownSetup,
 		publicImagePath: "assets/images/contexter",
 		publicPath: "timegate",
-		domain: domain_name,
+		domain: site,
 	});
 
 	return siteConfiguration;

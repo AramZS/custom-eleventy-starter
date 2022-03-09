@@ -1,6 +1,8 @@
 {
 	"layout": "post.njk",
-	"description": "Hazard Podcast",
-	"tags": [ "posts" ],
+	"description": "Somesite",
+	"tags": [
+		"posts"
+	],
 	"date": "Last Modified"
 }
