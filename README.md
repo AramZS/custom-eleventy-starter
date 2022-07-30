@@ -2,6 +2,8 @@
 
 Replace `somesite.com` with your domain.
 
+Replace `Site Name` with your site's name.
+
 Create a .env file with the following values:
 
 ```
