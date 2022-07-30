@@ -95,10 +95,10 @@ module.exports = (eleventyConfig, userOptions) => {
 						const { localImageName, originalImage, imageName } =
 							localImageObj;
 						imageCheck = true;
-						console.log(
-							"Local Cached Image",
-							`${options.domain}/${options.publicImagePath}/${fileName}/${imageName}`
-						);
+						//console.log(
+						//	"Local Cached Image",
+						//	`${options.domain}/${options.publicImagePath}/${fileName}/${imageName}`
+						// );
 						let image = originalImage;
 						htmlEmbed = htmlEmbed.replace(
 							image,
@@ -115,62 +115,92 @@ module.exports = (eleventyConfig, userOptions) => {
 							`<a href="${options.domain}/${options.publicPath}/${contextData.sanitizedLink}" is="contexter-link" target="_blank" class="read-link archive-link" itemprop="archivedAt" rel="timemap" slot="archive-link">Archived</a></contexter-box>`
 						);
 					}
+					if (contextData.data.twitterObj) {
+						htmlEmbed = htmlEmbed.replace(
+							/<script async src"https:\/\/platform\.twitter\.com\/widgets\.js" charset="utf-8"><\/script>/g,
+							""
+						);
+					}
 					// console.log("contextData", contextData);
 					// const contextData = JSON.parse(contextString);
-					inputContent = inputContent.replace(
-						urlObj.replace,
-						htmlEmbed
-					);
+					if (htmlEmbed) {
+						inputContent = inputContent.replace(
+							urlObj.replace,
+							htmlEmbed
+						);
+					}
 				} catch (e) {
 					if (imageCheck) {
 						console.log("Image issue possibly", e);
 					}
+					console.log("Contextualizing link: ", link);
+					inputContent = inputContent.replace(
+						urlObj.replace,
+						`<p><a href="${link}" target="_blank">${link}</a></p>`
+					);
 					let pContext = contexter.context(link);
 					completeAllPromiseArray.push(pContext);
 					// No file yet
 					console.log(
 						"Cached link " + cacheFile + " to repo not ready"
 					);
-					pContext.then((r) => {
-						const fileWritePromise = new Promise(
-							(resolve, reject) => {
-								console.log("Context ready", r.linkId);
-								// No file yet
-								console.log(
-									"Cached link for " +
-										cacheFile +
-										" ready to write."
-								);
-								try {
-									console.log("Writing data for: ", link);
-									fs.mkdirSync(cacheFolder, {
-										recursive: true,
-									});
-									imageHandler
-										.handleImageFromObject(
-											r,
-											fileName,
-											cacheFilePath
-										)
-										.then((localImageFileName) => {
-											if (localImageFileName) {
-												r.localImage = `/${options.publicImagePath}/${fileName}/${localImageFileName}`;
-												// console.log('write data to file', cacheFile)
-											}
-											fs.writeFileSync(
-												cacheFile,
-												JSON.stringify(r)
-											);
-											resolve(cacheFile);
+					pContext
+						.then((r) => {
+							const fileWritePromise = new Promise(
+								(resolve, reject) => {
+									console.log("Context ready", r.linkId);
+									// No file yet
+									console.log(
+										"Cached link for " +
+											cacheFile +
+											" ready to write."
+									);
+									try {
+										console.log("Writing data for: ", link);
+										fs.mkdirSync(cacheFolder, {
+											recursive: true,
 										});
-								} catch (e) {
-									console.log("writing to cache failed:", e);
-									reject(e);
+										imageHandler
+											.handleImageFromObject(
+												r,
+												fileName,
+												cacheFilePath
+											)
+											.then((localImageFileName) => {
+												if (localImageFileName) {
+													r.localImage = `/${options.publicImagePath}/${fileName}/${localImageFileName}`;
+													// console.log('write data to file', cacheFile)
+												}
+												fs.writeFileSync(
+													cacheFile,
+													JSON.stringify(r)
+												);
+												resolve(cacheFile);
+											})
+											.catch((e) => {
+												console.log(
+													"Image handling failed",
+													e
+												);
+											});
+									} catch (e) {
+										console.log(
+											"writing to cache failed:",
+											e
+										);
+										reject(e);
+									}
 								}
-							}
-						);
-						completeAllPromiseArray.push(fileWritePromise);
-					});
+							);
+							completeAllPromiseArray.push(fileWritePromise);
+						})
+						.catch((e) => {
+							console.log(
+								"Context adding promise failed on ",
+								link,
+								e
+							);
+						});
 				}
 			});
 		}
@@ -194,7 +224,9 @@ module.exports = (eleventyConfig, userOptions) => {
 			// options.md.set(data);
 			if (
 				(remark && data.layout && /post/.test(data.layout)) ||
-				/fwd/.test(data.layout)
+				/fwd/.test(data.layout) ||
+				/topic/.test(data.layout) ||
+				/timeline-item/.test(data.layout)
 			) {
 				// console.log("msc compile");
 
@@ -222,7 +254,7 @@ module.exports = (eleventyConfig, userOptions) => {
 				// Do whatever you want to do with the file
 
 				if (/\.json$/.test(file)) {
-					console.log("archivesFile", file);
+					// console.log("archivesFile", file);
 					files.push(file);
 				}
 			});
@@ -234,7 +266,14 @@ module.exports = (eleventyConfig, userOptions) => {
 	let archiveFilesList = [];
 	if (options.buildArchive) {
 		eleventyConfig.addCollection("archives", async (collection) => {
-			await Promise.all(completeAllPromiseArray);
+			try {
+				await Promise.all(completeAllPromiseArray);
+			} catch (e) {
+				console.log(
+					"Could not complete all promises from Contexter",
+					e
+				);
+			}
 			console.log("Archives Collection ");
 			archiveFilesList = buildArchiveFileList();
 			const archives = [];
@@ -247,13 +286,6 @@ module.exports = (eleventyConfig, userOptions) => {
 				const contextData = JSON.parse(fileContents);
 				if (contextData) {
 					try {
-						console.log(
-							contextData.sanitizedLink,
-							contextData.data.finalizedMeta.title,
-							contextData.data.finalizedMeta.description,
-							contextData.data.finalizedMeta.image,
-							contextData.data.finalizedMeta.date
-						);
 						if (
 							!contextData.data.archivedData.link &&
 							!contextData.data.twitterObj
