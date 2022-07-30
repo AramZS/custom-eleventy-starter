@@ -2,7 +2,7 @@
 
 You'll need to create deploy keys. This repo's `.gitignore` file assumes that you will name it `gh-pages` and save it locally. Do not ever commit those files to a public facing repo (or really any repo). Store them.
 
-This process is based on [a post by Lea Tortay](https://www.linkedin.com/pulse/eleventy-github-pages-lea-tortay/).
+This process is based on [a post by Lea Tortay](https://www.linkedin.com/pulse/eleventy-github-pages-lea-tortay/) [Archived copy available](https://web.archive.org/web/20210213122643/https://www.linkedin.com/pulse/eleventy-github-pages-lea-tortay/) in case it disappears.
 
 > You need to create an ACTIONS_DEPLOY_KEY.
 
